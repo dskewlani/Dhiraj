@@ -653,7 +653,7 @@ with page_tabs[0]:
                 st.session_state.eq_history=[]; db.save("eq_history",[]); st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PAGE 2 — OPTIONS (BankNifty + Nifty50 + All Equity Options CE/PE)
+# PAGE 2 — OPTIONS
 # ══════════════════════════════════════════════════════════════════════════════
 with page_tabs[1]:
     st.markdown('<div class="sec-ttl">⚡ OPTIONS TRADING — BANKNIFTY · NIFTY50 · ALL EQUITY CE/PE</div>', unsafe_allow_html=True)
@@ -737,25 +737,36 @@ with page_tabs[1]:
             </div>""", unsafe_allow_html=True)
 
             for row in chain_data:
-                if chain_otype=="CE Only" and row["strike"]<atm: pass
-                if chain_otype=="PE Only" and row["strike"]>atm: pass
                 atm_cls = "oc-atm" if row["is_atm"] else ("itm-ce" if row["strike"]<atm else "itm-pe")
                 atm_tag = " 🎯" if row["is_atm"] else ""
                 ce_p = row["ce_price"]; pe_p = row["pe_price"]
-                skip_ce = chain_otype=="PE Only"
-                skip_pe = chain_otype=="CE Only"
+                skip_ce = (chain_otype == "PE Only")
+                skip_pe = (chain_otype == "CE Only")
+
+                # ── FIX: pre-compute all display values to avoid format-spec in conditionals ──
+                ce_price_str  = f"₹{ce_p:.2f}"       if not skip_ce else "—"
+                pe_price_str  = f"₹{pe_p:.2f}"       if not skip_pe else "—"
+                ce_delta_str  = f"{row['ce_delta']:.3f}"  if not skip_ce else "—"
+                pe_delta_str  = f"{row['pe_delta']:.3f}"  if not skip_pe else "—"
+                ce_theta_str  = f"{row['ce_theta']:.2f}"  if not skip_ce else "—"
+                pe_theta_str  = f"{row['pe_theta']:.2f}"  if not skip_pe else "—"
+                ce_t12_str    = f"₹{row['ce_t1']:.0f}/₹{row['ce_t2']:.0f}" if not skip_ce else "—"
+                pe_t12_str    = f"₹{row['pe_t1']:.0f}/₹{row['pe_t2']:.0f}" if not skip_pe else "—"
+                ce_sig_str    = oc_sig_html(row['ce_signal']) if not skip_ce else "—"
+                pe_sig_str    = oc_sig_html(row['pe_signal']) if not skip_pe else "—"
+
                 st.markdown(f"""<div class="oc-row {atm_cls}">
-                    <div>{oc_sig_html(row['ce_signal']) if not skip_ce else '—'}</div>
-                    <div style="text-align:center;font-family:'JetBrains Mono';color:var(--accent);font-weight:700;font-size:0.85rem;">{f'₹{ce_p:.2f}' if not skip_ce else '—'}</div>
-                    <div style="text-align:center;font-family:'JetBrains Mono';font-size:0.72rem;">{row['ce_delta']:.3f if not skip_ce else '—'}</div>
-                    <div style="text-align:center;font-size:0.72rem;color:var(--red);">{row['ce_theta']:.2f if not skip_ce else '—'}</div>
-                    <div style="text-align:center;font-size:0.7rem;color:var(--teal);">{f'₹{row["ce_t1"]:.0f}/₹{row["ce_t2"]:.0f}' if not skip_ce else '—'}</div>
+                    <div>{ce_sig_str}</div>
+                    <div style="text-align:center;font-family:'JetBrains Mono';color:var(--accent);font-weight:700;font-size:0.85rem;">{ce_price_str}</div>
+                    <div style="text-align:center;font-family:'JetBrains Mono';font-size:0.72rem;">{ce_delta_str}</div>
+                    <div style="text-align:center;font-size:0.72rem;color:var(--red);">{ce_theta_str}</div>
+                    <div style="text-align:center;font-size:0.7rem;color:var(--teal);">{ce_t12_str}</div>
                     <div style="text-align:center;font-family:Orbitron;font-size:1rem;color:var(--gold);font-weight:700;">{row['strike']:,}{atm_tag}</div>
-                    <div style="text-align:center;font-size:0.7rem;color:var(--teal);">{f'₹{row["pe_t1"]:.0f}/₹{row["pe_t2"]:.0f}' if not skip_pe else '—'}</div>
-                    <div style="text-align:center;font-size:0.72rem;color:var(--red);">{row['pe_theta']:.2f if not skip_pe else '—'}</div>
-                    <div style="text-align:center;font-family:'JetBrains Mono';font-size:0.72rem;">{row['pe_delta']:.3f if not skip_pe else '—'}</div>
-                    <div style="text-align:center;font-family:'JetBrains Mono';color:var(--red);font-weight:700;font-size:0.85rem;">{f'₹{pe_p:.2f}' if not skip_pe else '—'}</div>
-                    <div>{oc_sig_html(row['pe_signal']) if not skip_pe else '—'}</div>
+                    <div style="text-align:center;font-size:0.7rem;color:var(--teal);">{pe_t12_str}</div>
+                    <div style="text-align:center;font-size:0.72rem;color:var(--red);">{pe_theta_str}</div>
+                    <div style="text-align:center;font-family:'JetBrains Mono';font-size:0.72rem;">{pe_delta_str}</div>
+                    <div style="text-align:center;font-family:'JetBrains Mono';color:var(--red);font-weight:700;font-size:0.85rem;">{pe_price_str}</div>
+                    <div>{pe_sig_str}</div>
                 </div>""", unsafe_allow_html=True)
 
             st.markdown('<div style="border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:6px 12px;background:var(--bg2);font-size:0.65rem;color:var(--muted);">Black-Scholes pricing · IV from India VIX · Click strike for deep analysis</div>', unsafe_allow_html=True)
