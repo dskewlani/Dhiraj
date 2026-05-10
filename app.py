@@ -13,8 +13,9 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import time
 import math
-st.sidebar.write(db.health_check())
+
 import storage as db
+st.sidebar.write(db.health_check())
 import engine as eng
 from ui import (
     TERMINAL_CSS, sig_badge, strength_bar, pnl_fmt,
