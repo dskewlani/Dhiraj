@@ -1,3 +1,5 @@
+python
+
 """
 app.py — ProTrader Terminal v3
 Professional Trading Terminal: Equity · Options · Futures · Auto Trading
@@ -1638,11 +1640,10 @@ with page_tabs[2]:
     with fut_tabs[0]:
         fc1, fc2, fc3 = st.columns([1, 1, 1])
         with fc1:
-            # ── FIX: guard against FUTURES_SYMBOLS shorter than hardcoded min ──
             _ft = max(1, len(eng.FUTURES_SYMBOLS))
-            _fm = min(30, _ft)          # safe min — never exceeds list length
-            _fd = _ft                   # default = scan everything
-            _fs = max(1, _ft // 10)    # step ~10% of total
+            _fm = min(30, _ft)
+            _fd = _ft
+            _fs = max(1, _ft // 10)
             fut_scan_n = st.number_input(
                 "Stocks to scan", _fm, _ft, _fd, _fs, key="fut_scan_n"
             )
@@ -1651,7 +1652,6 @@ with page_tabs[2]:
         with fc3:
             fut_min_str = st.slider("Min Strength", 45, 90, 58, 2, key="fut_min_str")
 
-        # Filter out raw "_FUT" placeholder symbols safely
         fut_syms = [s for s in eng.FUTURES_SYMBOLS if not s.endswith("_FUT")][:int(fut_scan_n)]
 
         if st.button("🔭 SCAN FUTURES UNIVERSE", use_container_width=True, key="fut_scan_btn"):
@@ -1803,7 +1803,6 @@ with page_tabs[2]:
                 fa_dur = st.number_input("Duration (minutes)", 1, 390, 30, 5, key="fa_dur")
                 fa_max = st.number_input("Max simultaneous positions", 1, 10, 3, 1, key="fa_max")
                 fa_str = st.number_input("Min signal strength", 50, 95, 60, 5, key="fa_str")
-                # ── FIX: same dynamic guard for auto-trading scan input ──
                 _fa_total = max(1, len(eng.FUTURES_SYMBOLS))
                 _fa_min   = min(10, _fa_total)
                 _fa_step  = max(1, _fa_total // 10)
@@ -2571,10 +2570,11 @@ with page_tabs[6]:
         fig_dist = go.Figure()
         fig_dist.add_trace(go.Histogram(
             x=pnl_vals, nbinsx=30,
-            marker_color=["#00e676" if v >= 0 else "#ff1744" for v in pnl_vals],
+            marker_color="#00e5ff",
             opacity=0.75, name="P&L Distribution",
         ))
-        fig_dist.add_vline(y=0, line_dash="dash", line_color="rgba(255,255,255,0.3)")
+        # FIX: add_vline takes x= (vertical line), not y=
+        fig_dist.add_vline(x=0, line_dash="dash", line_color="rgba(255,255,255,0.3)")
         fig_dist.update_layout(
             title="P&L Distribution Histogram",
             paper_bgcolor="#080c14", plot_bgcolor="#080c14",
