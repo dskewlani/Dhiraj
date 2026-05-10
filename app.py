@@ -1,4 +1,4 @@
-python
+
 
 """
 app.py — ProTrader Terminal v3
